@@ -1,5 +1,2 @@
-resmi
-hello
-world 
-good 
-morning
+Hello!
+Successfully executed FTP
