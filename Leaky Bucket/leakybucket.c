@@ -41,9 +41,15 @@ int main()
     for (i = 0; i < NOF_PACKETS; ++i)
     {
         // if packet_size + packet_size_remaining is greater than the bucket size
-        if (packet_sz[i] > b_size) /*compare the packet siz with bucket size*/
-                printf("\n\nIncoming packet size (%d bytes) is Greater than bucket capacity (%d bytes)-PACKET REJECTED", packet_sz[i], b_size);
+        if (packet_sz[i]+p_sz_rm > b_size)
+        {
+            if (packet_sz[i] > b_size) /*compare the packet siz with bucket size*/
+                    printf("\n\nIncoming packet size (%d bytes) is Greater than bucket capacity (%d bytes)-PACKET REJECTED", packet_sz[i], b_size);
+            else {
+                printf("\n\nBucket capacity exceeded--Packet rejected\n");
+            }
         // if packet size + remaining is less than the bucket size
+        }
         else
         {
             p_sz_rm += packet_sz[i];
