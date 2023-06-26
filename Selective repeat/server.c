@@ -7,6 +7,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 #define WINDOW_SIZE 5
 #define TIMEOUT_PROBABILITY 50
