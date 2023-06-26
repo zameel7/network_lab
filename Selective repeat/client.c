@@ -13,12 +13,16 @@
 #define TIMEOUT_PROBABILITY 50
 #define NAK_DELAY 10
 
-char client_message[10]; // Buffer to store the client message
+char client_message[10];  // Buffer to store the client message
 char acknowledgement[10]; // Buffer to store acknowledgements
 
-void convertIntToString(int);
+void convertIntToString(int num)
+{
+    sprintf(client_message, "%d", num);
+}
 
-int main() {
+int main()
+{
     struct sockaddr_in server_addr;
     int socket_desc, n, i, j, frameCounter = 1, totalFrames, errorFrame, nakDelay = 0, windowLength;
 
@@ -38,11 +42,14 @@ int main() {
     send(socket_desc, client_message, sizeof(client_message), 0);
     strcpy(acknowledgement, "Time Out");
 
-    while (1) {
-        for (i = 0; i < WINDOW_SIZE; i++) {
+    while (1)
+    {
+        for (i = 0; i < WINDOW_SIZE; i++)
+        {
             convertIntToString(frameCounter);
             send(socket_desc, client_message, sizeof(client_message), 0);
-            if (frameCounter <= totalFrames) {
+            if (frameCounter <= totalFrames)
+            {
                 printf("\nFrame %d Sent", frameCounter);
                 frameCounter++;
             }
@@ -50,36 +57,48 @@ int main() {
 
         i = 0;
         windowLength = WINDOW_SIZE;
-        while (i < WINDOW_SIZE) {
+        while (i < WINDOW_SIZE)
+        {
             recv(socket_desc, client_message, sizeof(client_message), 0);
             errorFrame = atoi(client_message + 1);
-            if (client_message[0] == 'N') {
+            if (client_message[0] == 'N')
+            {
                 nakDelay = NAK_DELAY;
-                if (errorFrame < totalFrames) {
+                if (errorFrame < totalFrames)
+                {
                     printf("\nNAK %d", errorFrame);
                     printf("\nFrame %d sent", errorFrame);
                     i--;
                 }
-            } else {
-                if (errorFrame <= totalFrames) {
+            }
+            else
+            {
+                if (errorFrame <= totalFrames)
+                {
                     printf("\nFrame %s Acknowledged", client_message);
                     windowLength--;
-                } else {
+                }
+                else
+                {
                     break;
                 }
             }
-            if (errorFrame > totalFrames) {
+            if (errorFrame > totalFrames)
+            {
                 break;
             }
             i++;
         }
 
-        if (windowLength == 0 && frameCounter > totalFrames) {
+        if (windowLength == 0 && frameCounter > totalFrames)
+        {
             send(socket_desc, acknowledgement, sizeof(acknowledgement), 0);
             recv(socket_desc, client_message, sizeof(client_message), 0);
             printf("\nFrame %s Acknowledged", client_message);
             break;
-        } else {
+        }
+        else
+        {
             frameCounter = frameCounter - windowLength;
             windowLength = WINDOW_SIZE;
         }
@@ -87,9 +106,4 @@ int main() {
 
     close(socket_desc);
     return 0;
-}
-
-// Function to convert an integer to a string and store it in 'client_message'
-void convertIntToString(int num) {
-    sprintf(client_message, "%d", num);
 }

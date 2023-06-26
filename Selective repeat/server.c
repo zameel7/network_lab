@@ -16,15 +16,20 @@
 char client_message[10];  // Buffer to store the client message
 char acknowledgement[10]; // Buffer used for sending acknowledgements
 
-void convertIntToString(int num) {
-    sprintf(client_message, "%d", num);
+void convertIntToString(int num, int isgenack)
+{
+    if (isgenack)
+    {
+        sprintf(acknowledgement, "N%d", num);
+    }
+    else
+    {
+        sprintf(client_message, "%d", num);
+    }
 }
 
-void generateAcknowledgement(int num) {
-    sprintf(acknowledgement, "N%d", num);
-}
-
-int main() {
+int main()
+{
     struct sockaddr_in server_addr, client_addr;
     int server_socket, client_socket, client_addr_length, i, j, frameCounter = 1, totalFrames;
 
@@ -45,41 +50,53 @@ int main() {
     strcpy(acknowledgement, "Time Out");
 
     recv(client_socket, client_message, sizeof(client_socket), 0);
-    totalFrames = atoi(client_message);  // Get the total number of frames from the client
+    totalFrames = atoi(client_message); // Get the total number of frames from the client
 
-    while (1) {
+    while (1)
+    {
         // Receive 'WINDOW_SIZE' number of frames from the client
-        for (i = 0; i < WINDOW_SIZE; i++) {
+        for (i = 0; i < WINDOW_SIZE; i++)
+        {
             recv(client_socket, client_message, sizeof(client_message), 0);
-            if (strcmp(client_message, acknowledgement) == 0) {
+            if (strcmp(client_message, acknowledgement) == 0)
+            {
                 break;
             }
         }
 
         i = 0;
-        while (i < WINDOW_SIZE) {
-            L:
+        while (i < WINDOW_SIZE)
+        {
+        L:
             j = rand() % TIMEOUT_PROBABILITY;
-            if (j < FRAME_LOSS_PROBABILITY) {
-                generateAcknowledgement(frameCounter);
+            if (j < FRAME_LOSS_PROBABILITY)
+            {
+                convertIntToString(frameCounter, 1);
                 send(client_socket, acknowledgement, sizeof(acknowledgement), 0);
                 goto L;
-            } else {
-                convertIntToString(frameCounter);
-                if (frameCounter <= totalFrames) {
+            }
+            else
+            {
+                convertIntToString(frameCounter, 0);
+                if (frameCounter <= totalFrames)
+                {
                     printf("\nFrame %s Received", client_message);
                     send(client_socket, client_message, sizeof(client_message), 0);
-                } else {
+                }
+                else
+                {
                     break;
                 }
                 frameCounter++;
             }
-            if (frameCounter > totalFrames) {
+            if (frameCounter > totalFrames)
+            {
                 break;
             }
             i++;
         }
-        if (frameCounter > totalFrames) {
+        if (frameCounter > totalFrames)
+        {
             break;
         }
     }
