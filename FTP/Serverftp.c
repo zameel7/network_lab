@@ -63,7 +63,7 @@ int main()
 		return -1;
 	}
 	// display the file name received from client in client_message
-	printf("%s\n", client_message);
+	printf("\nFilename: %s\n", client_message);
 
 	// open the file if valid and send its contents or else display and send error message
 	FILE *fileptr = fopen(client_message, "r");
@@ -87,7 +87,7 @@ int main()
 	}
 
 	server_message[i] = '\0';
-	printf("\n%s", server_message);
+	printf("\nFile contents: %s\n", server_message);
 
 	// send the file contents
 	if (send(client_socket, server_message, strlen(server_message), 0) < 0)

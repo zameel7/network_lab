@@ -8,7 +8,6 @@
 
 int main(void)
 {
-
     int socket_desc;
     struct sockaddr_in server_addr;
     char server_message[2000], filename[2000];
