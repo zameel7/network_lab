@@ -53,7 +53,7 @@ int main() {
         for (i = 0; i < WINDOW_SIZE; i++) {
             convertIntToString(currentFrame);
             send(socketDescriptor, frameArray, sizeof(frameArray), 0);
-            
+
             if (currentFrame <= frameCount) {
                 printf("\nFrame %d Sent", currentFrame);
                 currentFrame++;
@@ -87,7 +87,6 @@ int main() {
             if (progress > frameCount) {
                 break;
             }
-
             i++;
         }
 

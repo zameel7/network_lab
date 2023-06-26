@@ -45,7 +45,7 @@ int main() {
     // 7. Accept the connection with the accept(descriptor, pointer to socket address, actual length of address)
     client_size = sizeof(client);
     accepted_connection = accept(socket_descriptor, (struct sockaddr *)&client, &client_size);
-    printf("\nTCP connection established\n");
+    printf("\nConnection established\n");
 
     // 8. Receive packet and send ack or if lost, sender will resend
     strcpy(ack, "Time Out");
