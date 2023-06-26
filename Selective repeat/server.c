@@ -79,6 +79,9 @@ int main() {
             }
             i++;
         }
+        if (frameCounter > totalFrames) {
+            break;
+        }
     }
 
     close(client_socket);

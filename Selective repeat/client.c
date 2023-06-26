@@ -76,6 +76,8 @@ int main() {
 
         if (windowLength == 0 && frameCounter > totalFrames) {
             send(socket_desc, acknowledgement, sizeof(acknowledgement), 0);
+            recv(socket_desc, client_message, sizeof(client_message), 0);
+            printf("\nFrame %s Acknowledged", client_message);
             break;
         } else {
             frameCounter = frameCounter - windowLength;
