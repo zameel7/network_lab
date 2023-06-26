@@ -7,21 +7,19 @@
 #include <time.h>
 #include <ctype.h>
 #include <arpa/inet.h>
-#define W 5
-#define P1 50
-#define P2 10
 
+#define WINDOW_SIZE 5
+#define TIMEOUT_PROBABILITY 50
+#define NAK_DELAY 10
 
-char client_message[10];
-char b[10];
-void alpha9(int);
-int con();
+char client_message[10]; // Buffer to store the client message
+char acknowledgement[10]; // Buffer to store acknowledgements
 
-int main(){
+void convertIntToString(int);
 
+int main() {
     struct sockaddr_in server_addr;
-    int socket_desc, n, i, j, c = 1, f, e= 0, p =0, wl;
-    unsigned int s1;
+    int socket_desc, n, i, j, frameCounter = 1, totalFrames, errorFrame, nakDelay = 0, windowLength;
 
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     server_addr.sin_family = AF_INET;
@@ -30,90 +28,65 @@ int main(){
 
     connect(socket_desc, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
-    printf("\nTCP Connection Establised\n");
+    printf("\nTCP Connection Established\n");
 
     printf("Enter the number of frames: ");
-    scanf("%d", &f);
+    scanf("%d", &totalFrames);
 
-    alpha9(f);
+    convertIntToString(totalFrames);
     send(socket_desc, client_message, sizeof(client_message), 0);
-    strcpy(b, "Time Out");
+    strcpy(acknowledgement, "Time Out");
 
-    while(1){
-        for(i = 0; i < W; i++){
-            alpha9(c);
+    while (1) {
+        for (i = 0; i < WINDOW_SIZE; i++) {
+            convertIntToString(frameCounter);
             send(socket_desc, client_message, sizeof(client_message), 0);
-            if (c <= f){
-                printf("\nFrame %d Sent", c);
-                c++;
+            if (frameCounter <= totalFrames) {
+                printf("\nFrame %d Sent", frameCounter);
+                frameCounter++;
             }
         }
+
         i = 0;
-        wl =W;
-        while(i < W){
+        windowLength = WINDOW_SIZE;
+        while (i < WINDOW_SIZE) {
             recv(socket_desc, client_message, sizeof(client_message), 0);
-            p = atoi(client_message);
-            if (client_message[0]=='N'){
-                e = con();
-                if (e < f){
-                    printf("\nNAK %d", e);
-                    printf("\nFrame %d sent",e);
+            errorFrame = atoi(client_message + 1);
+            if (client_message[0] == 'N') {
+                nakDelay = NAK_DELAY;
+                if (errorFrame < totalFrames) {
+                    printf("\nNAK %d", errorFrame);
+                    printf("\nFrame %d sent", errorFrame);
                     i--;
                 }
-            }
-            else{
-                if (p <= f){
+            } else {
+                if (errorFrame <= totalFrames) {
                     printf("\nFrame %s Acknowledged", client_message);
-                    wl --;
-                }
-                else{
+                    windowLength--;
+                } else {
                     break;
                 }
             }
-            if (p > f){
+            if (errorFrame > totalFrames) {
                 break;
             }
             i++;
         }
-        if (wl == 0 && c > f){
-            send(socket_desc, b, sizeof(b), 0);
+
+        if (windowLength == 0 && frameCounter > totalFrames) {
+            send(socket_desc, acknowledgement, sizeof(acknowledgement), 0);
             break;
-        }
-        else{
-            c = c - wl;
-            wl = W;
+        } else {
+            frameCounter = frameCounter - windowLength;
+            windowLength = WINDOW_SIZE;
         }
     }
+
     close(socket_desc);
     return 0;
 }
 
-int con(){
-    char k[9];
-    int  i = 1;
-    while(client_message[i] != '\0'){
-        k[i - 1] = client_message[i];
-        i++;
-    }
-    k[i - 1] = '\0';
-    i = atoi(k);
-    return i;
-}
-
-void alpha9(int z){
-    int i = 0, j, k, g;
-    k = z;
-    while(k > 0){
-        i++;
-        k = k / 10;
-    }
-    g = i;
-    i--;
-    while(z > 0){
-        k = z % 10;
-        client_message[i] = k + 48;
-        i--;
-        z = z / 10;
-    }
-    client_message[g] = '\0';
+// Function to convert an integer to a string and store it in 'client_message'
+void convertIntToString(int num) {
+    sprintf(client_message, "%d", num);
 }

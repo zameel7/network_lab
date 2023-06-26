@@ -7,115 +7,80 @@
 #include <time.h>
 #include <ctype.h>
 #include <arpa/inet.h>
-#define W 5
-#define P1 50
-#define P2 10
 
+#define WINDOW_SIZE 5
+#define TIMEOUT_PROBABILITY 50
+#define FRAME_LOSS_PROBABILITY 10
 
-char client_message[10];
-char b[10];
-void alpha9(int);
-void alp(int);
+char client_message[10];  // Buffer to store the client message
+char acknowledgement[10]; // Buffer used for sending acknowledgements
 
+void convertIntToString(int num) {
+    sprintf(client_message, "%d", num);
+}
 
-int main(){
+void generateAcknowledgement(int num) {
+    sprintf(acknowledgement, "N%d", num);
+}
 
+int main() {
     struct sockaddr_in server_addr, client_addr;
-    int socket_desc, client_sock, n, i, j, c = 1, f;
-    unsigned int s1;
+    int server_socket, client_socket, client_addr_length, i, j, frameCounter = 1, totalFrames;
 
-    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(3000);
     server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-    bind(socket_desc, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
-    listen(socket_desc, 1);
+    listen(server_socket, 1);
 
-    n = sizeof(client_addr);
-    client_sock = accept(socket_desc, (struct sockaddr *)&client_addr, &n);
+    client_addr_length = sizeof(client_addr);
+    client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &client_addr_length);
 
-    printf("\nTCP Connection Establised\n");
+    printf("\nTCP Connection Established\n");
 
-    s1 = (unsigned int)time(NULL);
-    srand(s1);
-    strcpy(b, "Time Out");
-    
-    recv(client_sock, client_message, sizeof(client_sock), 0);
-    f = atoi(client_message);
+    strcpy(acknowledgement, "Time Out");
 
-    while(1){
-        for(i = 0; i < W; i++){
-            recv(client_sock, client_message, sizeof(client_message), 0);
-            if(strcmp(client_message, b) == 0){
+    recv(client_socket, client_message, sizeof(client_socket), 0);
+    totalFrames = atoi(client_message);  // Get the total number of frames from the client
+
+    while (1) {
+        // Receive 'WINDOW_SIZE' number of frames from the client
+        for (i = 0; i < WINDOW_SIZE; i++) {
+            recv(client_socket, client_message, sizeof(client_message), 0);
+            if (strcmp(client_message, acknowledgement) == 0) {
                 break;
             }
         }
+
         i = 0;
-        while(i < W){
+        while (i < WINDOW_SIZE) {
             L:
-                j = rand() % P1;
-            if(j < P2){
-                alp(c);
-                send(client_sock, b, sizeof(b), 0);
+            j = rand() % TIMEOUT_PROBABILITY;
+            if (j < FRAME_LOSS_PROBABILITY) {
+                generateAcknowledgement(frameCounter);
+                send(client_socket, acknowledgement, sizeof(acknowledgement), 0);
                 goto L;
-            }
-            else{
-                alpha9(c);
-                if (c <= f){
+            } else {
+                convertIntToString(frameCounter);
+                if (frameCounter <= totalFrames) {
                     printf("\nFrame %s Received", client_message);
-                    send(client_sock, client_message, sizeof(client_message), 0);
-                }
-                else{
+                    send(client_socket, client_message, sizeof(client_message), 0);
+                } else {
                     break;
                 }
-                c++;
+                frameCounter++;
             }
-            if (c > f){
+            if (frameCounter > totalFrames) {
                 break;
             }
             i++;
         }
     }
-    close(client_sock);
-    close(socket_desc);
+
+    close(client_socket);
+    close(server_socket);
     return 0;
-}
-
-void alpha9(int z){
-    int i = 0, j, k, g;
-    k = z;
-    while(k > 0){
-        i++;
-        k = k / 10;
-    }
-    g = i;
-    i--;
-    while(z > 0){
-        k = z % 10;
-        client_message[i] = k + 48;
-        i--;
-        z = z / 10;
-    }
-    client_message[g] = '\0';
-}
-
-void alp(int z){
-    int k, i = 1, j, g;
-    k = z;
-    b[0] = 'N';
-    while(k > 0){
-        i++;
-        k = k/10;
-    }
-    g= i;
-    i --;
-    while(z > 0){
-        k = z % 10;
-        b[i] = k + 48;
-        i --;
-        z=  z / 10;
-    }
-    b[g] = '\0';
 }
