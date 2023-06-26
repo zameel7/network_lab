@@ -31,7 +31,6 @@ int main()
     {
         count = 0;
         for (i = 0; i < nodes; i++)
-
             for (j = 0; j < nodes; j++)
                 for (k = 0; k < nodes; k++)
                     if (rt[i].dist[j] > costmat[i][k] + rt[k].dist[j])
@@ -48,7 +47,7 @@ int main()
         printf("\n\n For router %d\n", i + 1);
         for (j = 0; j < nodes; j++)
         {
-            printf("\t\n node %d Distance %d", j + 1, rt[i].from[j] + 1, rt[i].dist[j]);
+            printf("\t\n Node %d via %d Distance %d", j + 1, rt[i].from[j] + 1, rt[i].dist[j]);
         }
     }
     printf("\n\n");
