@@ -28,7 +28,7 @@ int main() {
 
 void sender() {
     static int flag=0;
-    if(turn=='s') {
+    if(turn == 's') {
         if (errorack != 0)
         {
             if(flag == 1)
@@ -58,23 +58,23 @@ void sender() {
 
 void receiver() {
     static int frexp = 1;
-    if(turn=='r') {
-        if(errorframe!=0) {
-            if(p.seq==frexp) {
+    if(turn == 'r') {
+        if(errorframe != 0) {
+            if(p.seq == frexp) {
                 printf("Receiver: received packet with seq no.: %d\n", p.seq);
                 ack=p.seq;
                 frexp+=1;
                 turn='s';
                 errorack=rand()%4;
-                printf("%s\n", (errorack==0?"Error while sending ACK":""));
+                printf("%s\n", (errorack == 0? "Error while sending ACK" : ""));
             }
         }
         else {
-            printf("Receiver: Dupicated packet with seq %d\n", frexp-1);
-            ack = frexp-1;
+            printf("Receiver: Duplicated packet with seq %d\n", frexp-1);
+            ack = frexp - 1;
             turn = 's';
-            errorack = rand()%4;
-            printf("%s\n", (errorack==0?"Error while sending ACK":""));
+            errorack = rand() % 4;
+            printf("%s\n", (errorack == 0 ? "Error while sending ACK" : ""));
         }
     }
 }
