@@ -6,11 +6,11 @@ typedef struct frame {
 }frame;
 
 int ack; // to mark acknowledgement
-int t=5, k; // t to represent timer and k
+int t=5, k; // t to represent timer and k for loop
 int disconnect=0; // to disconnect the connection
-frame p;
 char turn = 's'; // to check if send or receive
 int errorframe=1, errorack=1;
+frame p;
 
 void sender();
 void receiver();
@@ -29,7 +29,7 @@ int main() {
 void sender() {
     static int flag=0;
     if(turn=='s') {
-        if (errorack=0)
+        if (errorack==0)
         {
             printf("Sender: sent packet with seq no.: %d\n", p.seq);
             errorframe = rand()%4;
