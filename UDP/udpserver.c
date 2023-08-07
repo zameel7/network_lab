@@ -1,52 +1,51 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <arpa/inet.h>
 #include <netinet/in.h>
 
 #define MAXLINE 1024
 #define PORT 4000
 
-int main (void)
-{
-    int sockfd;
-    struct sockaddr_in serveraddr , clientaddr;
-    char buffer[MAXLINE], hello[20];
+int main(void) {
+    int sock_desc, client_size, n;
+    char client_msg[MAXLINE], server_msg[MAXLINE];
+    struct sockaddr_in client_addr, server_addr;
 
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if(sockfd < 0)
-    {
-        printf("Socket cannot be created");
+    client_size = sizeof(client_addr);
+
+    memset(&client_addr, '\0', sizeof(client_addr));
+    memset(& server_addr, '\0', sizeof(server_addr));
+
+    sock_desc = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock_desc<0) {
+        printf("Unable to create a socket\n");
         return -1;
     }
-    printf("Socket created succesfully\n");
 
-    memset(&serveraddr, '\0', sizeof(serveraddr));
-    memset(&clientaddr, '\0', sizeof(clientaddr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
 
-    serveraddr.sin_family= AF_INET ;
-    serveraddr.sin_port= htons(PORT);
-    serveraddr.sin_addr.s_addr= INADDR_ANY ;
-
-    if(bind(sockfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr))<0)
+    if (bind(sock_desc, (struct sockaddr *)&server_addr, sizeof(server_addr))<0)
     {
-        printf("Cannot Bind");
+        printf("Couldn't socket and server\n");
         return -1;
     }
     printf("Binding Successful\n");
-
-    int len, n;
-    len = sizeof(clientaddr);
-
-    n = recvfrom(sockfd, (char*) buffer,MAXLINE, MSG_WAITALL,(struct sockaddr*)&clientaddr, &len);
-    buffer[n]='\0';
-    printf("Message received : %s\n",buffer);
     
-    printf("Enter the message: ");
-    gets(hello);
-    sendto(sockfd, (const char*) hello, strlen(hello), 0,(const struct sockaddr*)&clientaddr, len);
+    n = recvfrom(sock_desc, (char *)client_msg, 1024, MSG_WAITALL, (struct sockaddr *)&client_addr, &client_size);
+    client_msg[n] = '\0';
+    
+    printf("Message received: %s\n", client_msg);
+
+    printf("Enter message to send: ");
+    gets(server_msg);
+
+    sendto(sock_desc, (const char*)server_msg, strlen(server_msg), 0, (const struct sockaddr *)&client_addr, client_size);
     printf("Message sent\n");
 
     return 0;
