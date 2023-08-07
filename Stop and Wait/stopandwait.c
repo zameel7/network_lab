@@ -62,10 +62,10 @@ void receiver() {
         if(errorframe != 0) {
             if(p.seq == frexp) {
                 printf("Receiver: received packet with seq no.: %d\n", p.seq);
-                ack=p.seq;
-                frexp+=1;
-                turn='s';
-                errorack=rand()%4;
+                ack = p.seq;
+                frexp += 1;
+                turn = 's';
+                errorack = rand() % 4;
                 printf("%s\n", (errorack == 0? "Error while sending ACK" : ""));
             }
         }
