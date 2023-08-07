@@ -46,7 +46,7 @@ int main (void)
     
     printf("Enter the message: ");
     gets(hello);
-    sendto(sockfd, (const char*) hello, strlen(hello), MSG_CONFIRM,(const struct sockaddr*)&clientaddr, len);
+    sendto(sockfd, (const char*) hello, strlen(hello), 0,(const struct sockaddr*)&clientaddr, len);
     printf("Message sent\n");
 
     return 0;

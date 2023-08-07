@@ -35,7 +35,7 @@ int main(void)
     printf("Enter the message: ");
     gets(hello);
     
-    sendto(sockfd, (const char *)hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, len);
+    sendto(sockfd, (const char *)hello, strlen(hello), 0, (const struct sockaddr *) &serveraddr, len);
     printf("Message sent\n");
     
     n = recvfrom(sockfd, (char *)buffer, MAXLINE, MSG_WAITALL, (struct sockaddr *)&serveraddr, &len);
